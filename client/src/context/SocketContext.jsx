@@ -16,9 +16,21 @@ export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socketUrl = import.meta.env.PROD 
-      ? window.location.origin 
-      : 'http://localhost:3001';
+    // 개발 모드에서는 현재 호스트의 3001 포트로 연결
+    // 프로덕션 모드에서는 같은 origin 사용
+    const getSocketUrl = () => {
+      if (import.meta.env.PROD) {
+        return window.location.origin;
+      }
+      // 개발 모드: 현재 접속한 호스트명의 3001 포트로 연결
+      // localhost로 접속하면 localhost:3001로 연결
+      // IP로 접속하면 해당 IP:3001로 연결
+      const host = window.location.hostname;
+      return `http://${host}:3001`;
+    };
+    
+    const socketUrl = getSocketUrl();
+    console.log('Connecting to socket server:', socketUrl);
     
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling']
